@@ -1,0 +1,21 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: ai-trading-cron
+spec:
+  schedule: "*/5 * * * * *" # every 5 seconds (requires cron with seconds support)
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+            - name: ai-trading
+              image: your-registry/ai-trading:latest
+              imagePullPolicy: IfNotPresent
+              env:
+                - name: OPENAI_API_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      name: openai
+                      key: apiKey
+          restartPolicy: OnFailure
