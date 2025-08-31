@@ -26,31 +26,41 @@ async function main() {
 			messages: [{ role: "user", content: cfg.prompt }],
 		},
 		{
-			streamMode: "values",
+			streamMode: "values" as const,
 		},
 	);
 
+	let from = 0;
 	for await (const chunk of stream) {
 		try {
-			const recentMsg = chunk.messages[chunk.messages.length - 1];
-			const message = msgConverter(recentMsg.content);
+			for (let i = from; i < chunk.messages.length; i++) {
+				const recentMsg = chunk.messages[i];
+				const message = msgConverter(recentMsg.content);
 
-			for (const msg of message) {
-				if (recentMsg.getType() === "tool") {
-					logger.info(`>: ${msg}`, {
-						name: recentMsg.name,
-					});
-				} else if (recentMsg.getType() === "ai") {
-					logger.info(`[ai:${recentMsg.name}]: ${msg}`);
-				} else if (recentMsg.getType() === "human") {
-					logger.info(`[human]: ${msg}`);
-				} else {
-					logger.info(msg);
+				for (const msg of message) {
+					if (recentMsg.getType() === "tool") {
+						logger.info(`=>: ${msg}`, {
+							name: recentMsg.name,
+						});
+					} else if (recentMsg.getType() === "function") {
+						logger.info(`++: ${msg}`, {
+							name: recentMsg.name,
+						});
+					} else if (recentMsg.getType() === "ai") {
+						logger.info(`[ai: ${recentMsg.name}]: ${msg}`);
+					} else if (recentMsg.getType() === "human") {
+						logger.info(`[human]: ${msg}`);
+					} else if (recentMsg.getType() === "system") {
+						logger.info(`[system]: ${msg}`);
+					} else {
+						logger.info(msg);
+					}
 				}
 			}
+
+			from = chunk.messages.length;
 		} catch (e) {
-			console.error("UnhandledRejection", e);
-			logger.debug("Supervisor chunk (unserializable)", { e });
+			logger.error("UnhandledRejection", e);
 		}
 	}
 

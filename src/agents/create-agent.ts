@@ -19,7 +19,7 @@ function buildLlm(root: AppConfig, override?: LlmConfig) {
 		: { timeout: 15000 };
 	return new ChatOpenAI({
 		openAIApiKey: apiKey,
-		modelName: eff.model,
+		model: eff.model,
 		configuration,
 		maxRetries: 0,
 	});

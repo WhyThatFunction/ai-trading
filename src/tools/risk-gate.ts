@@ -20,8 +20,6 @@ export const risk_riskGate = tool(
 			);
 		}
 
-		console.log({ i: input.intents });
-
 		const approved: any[] = [];
 		const rejected: any[] = [];
 		const notes: string[] = [];

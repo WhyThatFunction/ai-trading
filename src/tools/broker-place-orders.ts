@@ -29,11 +29,13 @@ export const broker_placeOrders = tool(
 		name: "broker_placeOrders",
 		description: "Place orders with broker (LIVE/PAPER)",
 		schema: z.object({
-			intents: z.array(z.object({
-                symbol: z.string(),
-                side: z.string(),
-                size: z.number()
-            })),
+			intents: z.array(
+				z.object({
+					symbol: z.string(),
+					side: z.string(),
+					size: z.number(),
+				}),
+			),
 			mode: z.enum(["LIVE", "PAPER"]).optional(),
 		}),
 	},

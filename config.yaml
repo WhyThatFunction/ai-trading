@@ -131,8 +131,8 @@ tools:
 
   - name: signal_toTradeIntents
     options:
-      threshold: 0.2
+      threshold: 0.1
 
   - name: risk_riskGate
     options:
-      sizeCap: 1
+      sizeCap: 0.5

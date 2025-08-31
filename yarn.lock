@@ -1158,6 +1158,7 @@ __metadata:
     dotenv: "npm:^17.2.1"
     js-yaml: "npm:^4.1.0"
     langchain: "npm:^0.3.31"
+    langsmith: "npm:^0.3.66"
     lodash: "npm:^4.17.21"
     openai: "npm:^5.16.0"
     rimraf: "npm:^6.0.1"
@@ -2404,7 +2405,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"langsmith@npm:^0.3.46":
+"langsmith@npm:^0.3.46, langsmith@npm:^0.3.66":
   version: 0.3.66
   resolution: "langsmith@npm:0.3.66"
   dependencies:

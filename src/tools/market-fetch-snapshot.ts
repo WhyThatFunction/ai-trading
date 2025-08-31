@@ -11,12 +11,12 @@ export const market_fetchSnapshot = tool(
 			throw new Error(
 				"market_fetchSnapshot requires symbols from config.tools or input",
 			);
-        
-        // TODO Fetch for real
+
+		// TODO Fetch for real
 		const prices: Record<string, number> = {};
 		for (const s of symbols) prices[s] = 100 + (hashStr(s) % 500) / 10;
-		
-        const snapshot = { prices, ts: Date.now() };
+
+		const snapshot = { prices, ts: Date.now() };
 		runCache.snapshot = snapshot;
 		return JSON.stringify(snapshot);
 	},
