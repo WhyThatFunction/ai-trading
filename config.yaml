@@ -1,1 +1,138 @@
-prompt: "Hello from config"
+prompt: |-
+  Identify what would be interesting to buy/sell next, then buy/sell it. Else, hold.
+  - Identify potential signals
+  - Analyze current options for my risky momentum style
+
+# Logging configuration
+logging:
+  level: debug
+  json: false
+  timestamp: true
+  prettyPrint: true
+
+# Default LLM settings (agents can override)
+llm:
+  baseUrl: "https://ai.kivoyo.com/api"
+  apiKeyEnv: "OPENAI_API_KEY"
+  model: "qwen3-235b-a22b-instruct-2507"
+
+agents:
+  data_agent:
+    display_name: 'Data Agent'
+    # llm:
+    #   baseUrl: "http://10.10.0.229:11434/v1"
+    #   apiKeyEnv: "OPENAI_API_KEY"
+    #   model: "llama3.2:3b"
+    prompt: |-
+      - Fetch batched market data (prices, optional OHLCV/orderbook) for all symbols. 
+      - Normalize and cache snapshot for this run. 
+      - Use market_fetchSnapshot once per run. 
+      - Store the snapshot via storage_writeJson at uri "run:snapshot"
+    tools:
+      - market_fetchSnapshot
+      - storage_writeJson
+  momentum_strategy:
+    display_name: 'Momentum Strategy'
+    prompt: |-
+      - Read snapshot from storage_readJson(uri:"run:snapshot"). 
+      - Compute momentum signals numerically via signal_computeSignals and convert to trade intents using signal_toTradeIntents. 
+      - Only produce intents; never place orders.
+    tools:
+      - signal_computeSignals
+      - signal_toTradeIntents
+      - storage_readJson
+  mean_reversion_strategy:
+    display_name: 'Mean-Reversion Strategy'
+    prompt: |-
+      - Read snapshot from storage_readJson(uri:"run:snapshot"). 
+      - Compute signals and convert to trade intents. 
+      - Be conservative. Only produce intents; never place orders.
+    tools:
+      - signal_computeSignals
+      - signal_toTradeIntents
+      - storage_readJson
+  risk_agent:
+    display_name: 'Risk Agent'
+    prompt: |-
+      - Combine intents from strategies (from prior messages).
+      - Fetch positions if needed via portfolio_getPositions. 
+      - Apply risk_riskGate. Store outcome at uri "run:risk". 
+      - Return a concise summary with counts.
+    tools:
+      - risk_riskGate
+      - portfolio_getPositions
+      - storage_readJson
+      - storage_writeJson
+  policy_agent:
+    display_name: 'Policy Agent'
+    prompt: |-
+      - Enforce trading window and symbol policy. 
+      - Use policy_tradingWindowOpen and policy_validateSymbols. 
+      - Write filtered intents to uri "run:policy".
+    tools:
+      - policy_tradingWindowOpen
+      - policy_validateSymbols
+      - storage_readJson
+      - storage_writeJson
+  execution_agent:
+    display_name: 'Execution Agent'
+    prompt: |-
+      - Convert approved intents into orders using broker_placeOrders in PAPER mode by default. 
+      - Never perform math; never call in LIVE unless explicitly instructed. 
+      - Write fills to uri "run:fills".
+    tools:
+      - broker_placeOrders
+      - storage_readJson
+      - storage_writeJson
+  portfolio_agent:
+    display_name: 'Portfolio/Accounting Agent'
+    prompt: |-
+      - Compute positions, exposure, and P&L snapshot before/after execution. 
+      - Use portfolio_markToMarket with latest prices. 
+      - Write results to uri "run:portfolio".
+    tools:
+      - portfolio_markToMarket
+      - portfolio_getPositions
+      - storage_readJson
+      - storage_writeJson
+  reporter:
+    display_name: Reporter
+    prompt: |-
+      - Build machine-readable JSON report and a concise human summary
+      - Aggregate artifacts from run:snapshot, run:risk, run:policy, run:fills, run:portfolio. 
+      - Use LLM only for explanation/formatting, not for math. 
+      - Write the final JSON to uri "run:report" and then provide a human-readable summary.
+    tools:
+      - storage_readJson
+      - storage_writeJson
+
+supervisor:
+  prompt: "Follow the configured sequence of agents and enforce PAPER vs LIVE from tools. Only the reporter should present final user-facing output."
+
+# Tool configuration (used as defaults by tools)
+tools:
+  - name: market_fetchSnapshot
+    options:
+      symbols: [ "AAPL", "MSFT" ]
+      tf: "1m"
+      lookback: 100
+
+  - name: policy_validateSymbols
+    options:
+      allowlist: [ ]
+
+  - name: policy_tradingWindowOpen
+    options:
+      window: "09:30-16:00 UTC"
+
+  - name: broker_placeOrders
+    options:
+      mode: PAPER
+
+  - name: signal_toTradeIntents
+    options:
+      threshold: 0.2
+
+  - name: risk_riskGate
+    options:
+      sizeCap: 1
