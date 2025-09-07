@@ -3,6 +3,7 @@ import { ChatOpenAI } from "@langchain/openai";
 import _ from "lodash";
 import { createAgent } from "../agents/create-agent.js";
 import { getConfig, getEnvKey } from "../config.js";
+import { notifyTool } from "../tools/notify-tool.js";
 
 export function buildGraph() {
 	const cfg = getConfig();
@@ -34,7 +35,8 @@ export function buildGraph() {
 	const supervisor = createSupervisor({
 		agents,
 		llm,
-		prompt: `You are the Supervisor/Router, a helpful and serious assistant, critical thinking about trading. You the following: ${cfg.supervisor.prompt}`,
+		prompt: `You are the Supervisor/Router, a helpful and serious assistant, critical thinking about trading. You're the following: ${cfg.supervisor.prompt}\n\nAlways notify at the end`,
+		tools: [notifyTool],
 	});
 
 	return supervisor.compile();

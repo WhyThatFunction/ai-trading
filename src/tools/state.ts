@@ -1,4 +1,12 @@
-// Shared in-memory state for tools (fast, no I/O)
+/**
+ * Shared in-memory state for tools (fast, no I/O).
+ *
+ * This module provides two constructs:
+ * - `storage`: legacy in-memory Map (storage_* now uses file-backed JSON)
+ * - `runCache`: a small object for cross-tool artifacts during a single run
+ *
+ * Persistence: None. All data is lost when the process exits.
+ */
 export const storage = new Map<string, any>();
 export const runCache: {
 	snapshot: { prices: Record<string, number>; ts: number } | null;

@@ -2,6 +2,29 @@ import { tool } from "@langchain/core/tools";
 import { z } from "zod";
 import { getToolConfig } from "./tool-config.js";
 
+/**
+ * signal_toTradeIntents
+ *
+ * Converts numeric signals into simple market order intents based on a
+ * threshold. Positive signals above threshold -> buy; negative below -threshold
+ * -> sell. Size = 1, type = "market".
+ *
+ * Status: FAKE (toy thresholding). No sizing logic, slippage model, or
+ * instrument metadata.
+ *
+ * Inputs (zod schema):
+ * - signals: Record<string, number>
+ * - cfg?: { threshold?: number } — Optional override for threshold
+ *
+ * Config:
+ * - tools.signal_toTradeIntents.options.threshold: number — Default threshold
+ *
+ * Output:
+ * - JSON string of Array<{ symbol, side, size, type }>
+ *
+ * Errors:
+ * - Throws if threshold is not provided via input or config.
+ */
 export const signal_toTradeIntents = tool(
 	async (input: {
 		signals: Record<string, number>;

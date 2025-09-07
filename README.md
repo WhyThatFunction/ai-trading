@@ -24,8 +24,19 @@ This project composes multiple agents in a LangGraph state graph. See `src/graph
 - `yarn build`: Cleans `dist` and builds with SWC (includes source maps).
 - `yarn start`: Runs the compiled build from `dist`.
 
+## Storage (file-backed)
+
+- No Redis required. Tools persist small JSON artifacts under `data/`.
+- Positions are stored at `data/pos/{mode}.json` (e.g., PAPER -> `data/pos/paper.json`).
+- Ad-hoc run artifacts use URIs like `run:snapshot` -> `data/run/snapshot.json`.
+
 ## Configuration
 
 - App config is loaded from `config.yaml` at the project root.
 - Logging is configured via the `logging` section and uses Winston.
 - Agent options can be set under `agents` (e.g., supervisor, policy, data, reporter). The default LLM settings can be set under `llm` and overridden per-agent.
+
+## Tools Documentation
+
+- Overview and exact behavior: `src/tools/README.md`
+- Generated API docs (Markdown): `docs/tools/` (run `yarn docs:tools`)

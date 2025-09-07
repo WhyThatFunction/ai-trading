@@ -1,5 +1,17 @@
 import { getConfig } from "../config.js";
 
+/**
+ * getToolConfig
+ *
+ * Resolves per-tool configuration from `config.yaml` under the `tools:`
+ * section. Supports both array-of-objects and record shapes.
+ *
+ * Shapes supported:
+ * - tools: [{ name: string, options?: any }, ...]
+ * - tools: { [toolName: string]: any }
+ *
+ * Returns the `options` (or record value) typed as `T | undefined`.
+ */
 export function getToolConfig<T>(name: string): T | undefined {
 	const cfg = getConfig();
 	const t = cfg.tools;

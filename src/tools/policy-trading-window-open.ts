@@ -6,6 +6,28 @@ type ToolConfig = {
 	window: string;
 };
 
+/**
+ * policy_tradingWindowOpen
+ *
+ * Validates whether the current UTC time falls within the configured
+ * trading window.
+ *
+ * Status: REAL (pure calculation, no I/O).
+ *
+ * Inputs (zod schema):
+ * - now?: string — Optional ISO datetime override (UTC assumed)
+ * - window?: string — Optional window override, else resolves from config
+ *
+ * Config:
+ * - tools.policy_tradingWindowOpen.options.window: string — Format
+ *   "HH:MM-HH:MM [UTC]". Example: "09:30-16:00 UTC".
+ *
+ * Output:
+ * - JSON string: { open: boolean }
+ *
+ * Errors:
+ * - Throws if window is missing or not in the expected format.
+ */
 export const policy_tradingWindowOpen = tool(
 	async (input: { now?: string; window?: string }) => {
 		const cfg = getToolConfig<ToolConfig>("policy_tradingWindowOpen");
@@ -25,8 +47,8 @@ export const policy_tradingWindowOpen = tool(
 					"policy_tradingWindowOpen window format must be HH:MM-HH:MM [UTC]",
 				);
 			const [_, h1, m1, h2, m2] = m;
-			const start = parseInt(h1) * 60 + parseInt(m1);
-			const end = parseInt(h2) * 60 + parseInt(m2);
+			const start = parseInt(h1, 10) * 60 + parseInt(m1, 10);
+			const end = parseInt(h2, 10) * 60 + parseInt(m2, 10);
 			const mins = now.getUTCHours() * 60 + now.getUTCMinutes();
 			return start <= end
 				? mins >= start && mins <= end

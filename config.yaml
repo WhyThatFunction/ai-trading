@@ -30,6 +30,7 @@ agents:
       - Store the snapshot via storage_writeJson at uri "run:snapshot"
     tools:
       - market_fetchSnapshot
+      - market_fetchSnapshot_bitpanda
       - storage_writeJson
   momentum_strategy:
     display_name: 'Momentum Strategy'
@@ -82,6 +83,7 @@ agents:
       - Write fills to uri "run:fills".
     tools:
       - broker_placeOrders
+      - broker_bitpanda_placeOrders
       - storage_readJson
       - storage_writeJson
   portfolio_agent:
@@ -136,3 +138,26 @@ tools:
   - name: risk_riskGate
     options:
       sizeCap: 0.5
+
+  # Optional Bitpanda/One Trading tools (disabled by default; wire into agents if desired)
+  - name: market_fetchSnapshot_bitpanda
+    options:
+      symbols: [ "BTC_EUR", "ETH_EUR" ]
+      # Change if needed to match current One Trading base
+      baseUrl: "https://api.onetrading.com/public/v1"
+
+  - name: broker_bitpanda_placeOrders
+    options:
+      mode: PAPER
+      # LIVE requires HMAC signing per current API docs
+      baseUrl: "https://api.onetrading.com"
+      apiKeyEnv: "BITPANDA_API_KEY"
+      apiSecretEnv: "BITPANDA_API_SECRET"
+      # passphraseEnv: "BITPANDA_API_PASSPHRASE"
+  - name: notifyTool
+    options:
+      method: telegram # or stdout
+      telegram:
+        tokenEnv: TELEGRAM_BOT_TOKEN
+        chatIdEnv: TELEGRAM_CHAT_ID
+        # parseMode: MarkdownV2

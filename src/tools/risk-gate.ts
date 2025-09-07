@@ -2,6 +2,29 @@ import { tool } from "@langchain/core/tools";
 import { z } from "zod";
 import { getToolConfig } from "./tool-config.js";
 
+/**
+ * risk_riskGate
+ *
+ * Applies hard risk checks to proposed trade intents.
+ *
+ * Status: FAKE (minimal validation). Only enforces per-intent `size <= sizeCap`.
+ * No cross-intent checks, no exposure limits, and no P&L constraints.
+ *
+ * Inputs (zod schema):
+ * - intents: Array<{ size: number, ... }>
+ * - ctx: { limits?, positions?, prices?, pnlDay? } — not used by current logic
+ *
+ * Config:
+ * - tools.risk_riskGate.options.sizeCap: number — Maximum allowed size per intent
+ *
+ * Output:
+ * - JSON string of: { approved: any[], rejected: { intent, reason }[], notes: string[] }
+ *   - reason can be "size_exceeds_cap"
+ *
+ * Caveats:
+ * - Ignores `ctx` fields.
+ * - Treats intents as opaque except for `size`.
+ */
 export const risk_riskGate = tool(
 	async (input: {
 		intents: any[];
